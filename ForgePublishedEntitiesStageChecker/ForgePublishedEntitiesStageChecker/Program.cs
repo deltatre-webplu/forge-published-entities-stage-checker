@@ -1,12 +1,20 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 
 namespace ForgePublishedEntitiesStageChecker
 {
-	class Program
+	public class Program
 	{
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
-			Console.WriteLine("Hello World!");
+			var config = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+			.AddEnvironmentVariables()
+			.AddCommandLine(args)
+			.Build();
+
+			Console.WriteLine(config["Message"]);
+			Console.ReadLine();
 		}
 	}
 }
