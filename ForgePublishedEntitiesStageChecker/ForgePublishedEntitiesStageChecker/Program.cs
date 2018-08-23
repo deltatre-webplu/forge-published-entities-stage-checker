@@ -4,12 +4,18 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ForgePublishedEntitiesStageChecker
 {
 	public static class Program
 	{
 		public static void Main(string[] args)
+		{
+			RunAsync(args).Wait();
+		}
+
+		private static async Task RunAsync(string[] args)
 		{
 			var config = new ConfigurationBuilder()
 			.AddCommandLine(args)
@@ -25,10 +31,10 @@ namespace ForgePublishedEntitiesStageChecker
 
 			var client = new MongoClient(config["MongoConnString"]);
 			var db = client.GetDatabase("forge");
-			var coll = db.GetCollection<BsonDocument>("wcm.TagsPublished");
+			var coll = db.GetCollection<BsonDocument>("wcm.TagsPublished", new MongoCollectionSettings { GuidRepresentation = GuidRepresentation.CSharpLegacy });
 
 			var checker = new NeutralEntityStageChecker(coll);
-			var count = checker.GetPublishedEntitiesWithUnexpectedStage();
+			var entities = await checker.GetPublishedEntitiesWithUnexpectedStageAsync().ConfigureAwait(false);
 
 			Console.WriteLine("Hello my friend !");
 		}

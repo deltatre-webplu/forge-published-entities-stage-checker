@@ -4,6 +4,8 @@ using MongoDB.Driver;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using MongoDB.Driver.Linq;
 
 namespace ForgePublishedEntitiesStageChecker.Mongo
 {
@@ -16,7 +18,7 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 			_publishedEntities = publishedEntities ?? throw new ArgumentNullException(nameof(publishedEntities));
 		}
 
-		public int GetPublishedEntitiesWithUnexpectedStage()
+		public async Task<ReadOnlyCollection<NeutralEntity>> GetPublishedEntitiesWithUnexpectedStageAsync()
 		{
 			var query = from document in this._publishedEntities.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
@@ -24,11 +26,39 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 									select new
 									{
 										EntityId = g.Key,
-										Localizations = g.Select(i => new { TranslationId = i["_id"], Slug = i["Slug"], Culture = i["TranslationInfo.Culture"], Title = i["Title"] }).Distinct()
+										Localizations = g.Select(d => new
+										{
+											TranslationId = d["_id"],
+											Slug = d["Slug"],
+											Culture = d["TranslationInfo.Culture"],
+											Title = d["Title"]
+										})
 									};
 
-			var data = query.ToList();
-			return data.Count;
+			var queryItems = await query.ToListAsync().ConfigureAwait(false);
+
+			var neutralEntities = queryItems.Select(item =>
+			{
+				var entityId = item.EntityId.AsGuid;
+				var localizations = item.Localizations.Select(l =>
+					new Localization
+					{
+						Culture = l.Culture.IsBsonNull ? null : l.Culture.AsString,
+						Slug = l.Slug.IsBsonNull ? null : l.Slug.AsString,
+						Title = l.Title.IsBsonNull ? null : l.Title.AsString,
+						TranslationId = l.TranslationId.AsGuid
+					})
+					.ToList()
+					.AsReadOnly();
+
+				return new NeutralEntity
+				{
+					EntityId = entityId,
+					Localizations = localizations
+				};
+			}).ToList().AsReadOnly();
+
+			return neutralEntities;
 		}
 	}
 }
