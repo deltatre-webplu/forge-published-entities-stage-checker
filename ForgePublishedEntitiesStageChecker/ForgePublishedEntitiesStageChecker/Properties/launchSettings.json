@@ -1,8 +1,7 @@
 {
   "profiles": {
     "ForgePublishedEntitiesStageChecker": {
-      "commandName": "Project",
-      "commandLineArgs": "Message=\"Hello world !\""
+      "commandName": "Project"
     }
   }
 }

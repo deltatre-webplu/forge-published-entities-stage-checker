@@ -17,23 +17,20 @@ namespace ForgePublishedEntitiesStageChecker
 			if (configuration == null)
 				throw new ArgumentNullException(nameof(configuration));
 
-			var missingConfigurations = new List<string>();
+			var errors = new List<string>();
 
 			if (string.IsNullOrWhiteSpace(configuration[MongoConnStringConfigKey]))
-				missingConfigurations.Add(MongoConnStringConfigKey);
+				errors.Add($"Missing mandatory configuration: {MongoConnStringConfigKey}");
 
 			if (string.IsNullOrWhiteSpace(configuration[LogFilePathConfigKey]))
-				missingConfigurations.Add(LogFilePathConfigKey);
+				errors.Add($"Missing mandatory configuration: {LogFilePathConfigKey}");
 
 			if (string.IsNullOrWhiteSpace(configuration[ReportFilePathConfigKey]))
-				missingConfigurations.Add(ReportFilePathConfigKey);
+				errors.Add($"Missing mandatory configuration: {ReportFilePathConfigKey}");
 
-			if (missingConfigurations.Count == 0)
-				return ValidationResult<IConfiguration, string>.CreateValid(configuration);
-
-			var errorMessage = $"Please provide following configuration(s): {string.Join(" ", missingConfigurations)}";
-			var errors = new[] { errorMessage }.ToNonEmptySequence();
-			return ValidationResult<IConfiguration, string>.CreateInvalid(errors);
+			return errors.Count == 0
+				? ValidationResult<IConfiguration, string>.CreateValid(configuration)
+				: ValidationResult<IConfiguration, string>.CreateInvalid(errors.ToNonEmptySequence());
 		}
 	}
 }
