@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using ForgePublishedEntitiesStageChecker.Mongo;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 
@@ -19,6 +22,13 @@ namespace ForgePublishedEntitiesStageChecker
 				ShowMessageForMissingConfigurations(configValidationResult.Errors);
 				return;
 			}
+
+			var client = new MongoClient(config["MongoConnString"]);
+			var db = client.GetDatabase("forge");
+			var coll = db.GetCollection<BsonDocument>("wcm.TagsPublished");
+
+			var checker = new NeutralEntityStageChecker(coll);
+			var count = checker.GetPublishedEntitiesWithUnexpectedStage();
 
 			Console.WriteLine("Hello my friend !");
 		}
