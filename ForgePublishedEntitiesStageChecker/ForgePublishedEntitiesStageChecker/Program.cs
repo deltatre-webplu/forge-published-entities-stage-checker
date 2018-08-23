@@ -3,7 +3,7 @@ using System;
 
 namespace ForgePublishedEntitiesStageChecker
 {
-	public class Program
+	public static class Program
 	{
 		public static void Main(string[] args)
 		{
@@ -13,7 +13,7 @@ namespace ForgePublishedEntitiesStageChecker
 			.AddCommandLine(args)
 			.Build();
 
-			Console.WriteLine(config["Message"]);
+			Console.WriteLine(config["Foo"]);
 			Console.ReadLine();
 		}
 	}
