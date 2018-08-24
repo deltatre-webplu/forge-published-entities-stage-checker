@@ -17,7 +17,7 @@ namespace ForgePublishedEntitiesStageChecker
 
 		private static async Task RunAsync(string[] args)
 		{
-			var config = new ConfigurationBuilder()
+			IConfiguration config = new ConfigurationBuilder()
 			.AddCommandLine(args)
 			.Build();
 
