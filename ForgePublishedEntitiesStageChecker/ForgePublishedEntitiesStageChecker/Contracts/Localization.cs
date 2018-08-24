@@ -4,10 +4,10 @@ namespace ForgePublishedEntitiesStageChecker.Contracts
 {
 	public class Localization
 	{
-		public Guid TranslationId { get; set; }
-		public string Slug { get; set; }
-		public string Title { get; set; }
-		public string Culture { get; set; }
+		public Guid TranslationId { get; }
+		public string Slug { get; }
+		public string Title { get; }
+		public string Culture { get; }
 
 		public Localization(Guid translationId, string slug, string title, string culture)
 		{

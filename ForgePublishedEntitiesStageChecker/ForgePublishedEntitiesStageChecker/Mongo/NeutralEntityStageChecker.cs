@@ -40,23 +40,20 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 			var neutralEntities = queryItems.Select(item =>
 			{
 				var entityId = item.EntityId.AsGuid;
-				var localizations = item.Localizations.Select(l =>
-					new Localization
-					{
-						Culture = l.Culture.IsBsonNull ? null : l.Culture.AsString,
-						Slug = l.Slug.IsBsonNull ? null : l.Slug.AsString,
-						Title = l.Title.IsBsonNull ? null : l.Title.AsString,
-						TranslationId = l.TranslationId.AsGuid
-					})
-					.ToList()
-					.AsReadOnly();
 
-				return new NeutralEntity
+				var localizations = item.Localizations.Select(l => 
 				{
-					EntityId = entityId,
-					Localizations = localizations
-				};
-			}).ToList().AsReadOnly();
+					var culture = l.Culture.IsBsonNull ? null : l.Culture.AsString;
+					var slug = l.Slug.IsBsonNull ? null : l.Slug.AsString;
+					var title = l.Title.IsBsonNull ? null : l.Title.AsString;
+					var translationId = l.TranslationId.AsGuid;
+					return new Localization(translationId, slug, title, culture);
+				});
+
+				return new NeutralEntity(entityId, localizations);
+			})
+			.ToList()
+			.AsReadOnly();
 
 			return neutralEntities;
 		}
