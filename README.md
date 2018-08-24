@@ -8,7 +8,7 @@ Projections for both built-in entities and custom entities are checked; the enti
 
 There are two mandatories configurations: 
  - MongoConnString: connection string of your Forge backoffice database. You can find it inside Forge backoffice under *Administration* -> *Configuration* -> *Back End Store*
- - ReportFilePath: absolute path of the JSON report file produced by the application. The application will automatically create the file directory if it doesn't exist.
+ - ReportFilePath: absolute path to the JSON report file produced by the application. The application will automatically create the file directory if it doesn't exist.
 
 ## Invoke from command line
 
