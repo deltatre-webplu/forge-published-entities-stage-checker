@@ -1,6 +1,7 @@
 ﻿using ForgePublishedEntitiesStageChecker.Contracts;
 using ForgePublishedEntitiesStageChecker.Helpers;
 using Newtonsoft.Json;
+using Serilog;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,6 +11,8 @@ namespace ForgePublishedEntitiesStageChecker.Report
 	{
 		public void CreateJsonReport(string reportFilePath, IEnumerable<Entity> publishedEntitiesWithUnexpectedStage)
 		{
+			Log.Information("Creating JSON report...");
+
 			FileSystemHelpers.EnsureFileDirectoryExists(reportFilePath);
 
 			using (var streamWriter = File.CreateText(reportFilePath))
@@ -20,6 +23,8 @@ namespace ForgePublishedEntitiesStageChecker.Report
 				};
 				serializer.Serialize(streamWriter, publishedEntitiesWithUnexpectedStage);
 			}
+
+			Log.Debug("JSON report successfully created");
 		}
 	}
 }

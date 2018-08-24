@@ -25,7 +25,7 @@ namespace ForgePublishedEntitiesStageChecker
 			("tag", "wcm.TagsPublished")
 		};
 
-		private const string CustomEntitiesCollection = "wcm.CustomEntitiesPublished"; 
+		private const string CustomEntitiesCollection = "wcm.CustomEntitiesPublished";
 
 		public async static Task Main(string[] args)
 		{
@@ -33,7 +33,7 @@ namespace ForgePublishedEntitiesStageChecker
 
 			BootstrapLogger(configuration);
 
-			Log.Information("Start processing");
+			Log.Debug("Start processing");
 
 			try
 			{
@@ -44,13 +44,17 @@ namespace ForgePublishedEntitiesStageChecker
 				Log.Error(exception, "An error occurred");
 			}
 
-			Log.Information("End processing");
+			Log.Debug("End processing");
 
 			Log.CloseAndFlush();
 		}
 
 		private static async Task RunAsync(IConfiguration configuration)
 		{
+			Console.WriteLine("Press enter to start...");
+			Console.ReadLine();
+
+			Log.Information("Reading command line arguments...");
 			var configurationParser = new ConfigurationParser();
 			var settingsReadingResult = configurationParser.GetSettingsFromConfiguration(configuration);
 			if (!settingsReadingResult.IsSuccess)
@@ -60,12 +64,18 @@ namespace ForgePublishedEntitiesStageChecker
 			}
 			var settings = settingsReadingResult.Output;
 
-			var publishedEntitiesWithUnexpectedStage = await
-				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false);
+			Log.Debug("Provided command line arguments have been successfully validated");
+
+			var publishedEntitiesWithUnexpectedStage = (await
+				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false)).ToArray();
+
+			Log.Information("Found {NumberOfEntities} published entities with unexpected stage", publishedEntitiesWithUnexpectedStage.Length);
 
 			ExportJsonReport(settings.ReportFilePath, publishedEntitiesWithUnexpectedStage);
 
-			Console.WriteLine("All done here !");
+			Console.WriteLine();
+			Console.WriteLine("Execution completed. Press enter to close...");
+			Console.ReadLine();
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)

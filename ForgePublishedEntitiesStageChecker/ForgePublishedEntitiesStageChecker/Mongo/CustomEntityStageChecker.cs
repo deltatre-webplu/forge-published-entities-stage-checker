@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver.Linq;
+using Serilog;
 
 namespace ForgePublishedEntitiesStageChecker.Mongo
 {
@@ -22,6 +23,8 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 
 		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync()
 		{
+			Log.Information("Executing query for {EntityType}...", "custom entities");
+
 			var query = from document in this._publishedEntitiesColl.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
 									group document by new { EntityId = document["EntityId"], EntityCode = document["EntityCode"] } into g
@@ -40,6 +43,8 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 									};
 
 			var queryItems = await query.ToListAsync().ConfigureAwait(false);
+
+			Log.Debug("Query for {EntityType} successfully completed", "custom entities");
 
 			var entities = queryItems.Select(item =>
 			{
