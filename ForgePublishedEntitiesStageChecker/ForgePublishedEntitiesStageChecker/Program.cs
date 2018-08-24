@@ -1,5 +1,6 @@
 ﻿using ForgePublishedEntitiesStageChecker.Configuration;
 using ForgePublishedEntitiesStageChecker.Mongo;
+using ForgePublishedEntitiesStageChecker.Report;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -35,7 +36,10 @@ namespace ForgePublishedEntitiesStageChecker
 			var checker = new BuiltInEntityStageChecker(coll);
 			var entities = await checker.GetPublishedEntitiesWithUnexpectedStageAsync("tag").ConfigureAwait(false);
 
-			Console.WriteLine("Hello my friend !");
+			var reportCreator = new ReportCreator();
+			reportCreator.CreateJsonReport(parsingResult.Output.ReportFilePath, entities);
+
+			Console.WriteLine("All done here !");
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
