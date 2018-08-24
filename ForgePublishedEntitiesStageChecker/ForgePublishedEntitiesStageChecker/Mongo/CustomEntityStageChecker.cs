@@ -9,23 +9,26 @@ using MongoDB.Driver.Linq;
 
 namespace ForgePublishedEntitiesStageChecker.Mongo
 {
-	public class BuiltInEntityStageChecker
+	public class CustomEntityStageChecker
 	{
+		private const string EntityType = "customentity";
+
 		private readonly IMongoCollection<BsonDocument> _publishedEntitiesColl;
 
-		public BuiltInEntityStageChecker(IMongoCollection<BsonDocument> publishedEntitiesColl)
+		public CustomEntityStageChecker(IMongoCollection<BsonDocument> publishedEntitiesColl)
 		{
 			_publishedEntitiesColl = publishedEntitiesColl ?? throw new ArgumentNullException(nameof(publishedEntitiesColl));
 		}
 
-		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string entityType)
+		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync()
 		{
 			var query = from document in this._publishedEntitiesColl.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
-									group document by document["EntityId"] into g
+									group document by new { EntityId = document["EntityId"], EntityCode = document["EntityCode"] } into g
 									select new
 									{
-										EntityId = g.Key,
+										EntityId = g.Key.EntityId,
+										EntityCode = g.Key.EntityCode,
 										Localizations = g.Select(d => new
 										{
 											TranslationId = d["_id"],
@@ -41,7 +44,7 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 			{
 				var entityId = item.EntityId.AsGuid;
 
-				var localizations = item.Localizations.Select(l => 
+				var localizations = item.Localizations.Select(l =>
 				{
 					var culture = l.Culture.IsBsonNull ? null : l.Culture.AsString;
 					var slug = l.Slug.IsBsonNull ? null : l.Slug.AsString;
@@ -50,7 +53,9 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 					return new Localization(translationId, slug, title, culture);
 				});
 
-				return new Entity(entityId, entityType, entityType, localizations);
+				var entityCode = item.EntityCode.IsBsonNull ? null : item.EntityCode.AsString;
+
+				return new Entity(entityId, EntityType, entityCode, localizations);
 			})
 			.ToList()
 			.AsReadOnly();
