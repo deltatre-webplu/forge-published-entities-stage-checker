@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace ForgePublishedEntitiesStageChecker.Contracts
 {
@@ -7,5 +9,14 @@ namespace ForgePublishedEntitiesStageChecker.Contracts
 	{
 		public Guid EntityId { get; set; }
 		public ReadOnlyCollection<Localization> Localizations { get; set; }
+
+		public NeutralEntity(Guid entityId, IEnumerable<Localization> localizations)
+		{
+			if (localizations == null)
+				throw new ArgumentNullException(nameof(localizations));
+
+			this.EntityId = entityId;
+			this.Localizations = new ReadOnlyCollection<Localization>(localizations.ToList());
+		}
 	}
 }
