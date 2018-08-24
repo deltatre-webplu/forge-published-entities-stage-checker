@@ -27,9 +27,24 @@ namespace ForgePublishedEntitiesStageChecker
 
 		private const string CustomEntitiesCollection = "wcm.CustomEntitiesPublished";
 
-		public static void Main(string[] args)
+		public async static Task Main(string[] args)
 		{
-			RunAsync(args).Wait();
+			BootstrapLogger();
+
+			Log.Information("Start processing");
+
+			try
+			{
+				await RunAsync(args).ConfigureAwait(false);
+			}
+			catch (Exception exception)
+			{
+				Log.Error(exception, "An error occurred");
+			}
+
+			Log.Information("End processing");
+
+			Log.CloseAndFlush();
 		}
 
 		private static async Task RunAsync(string[] args)
@@ -45,7 +60,7 @@ namespace ForgePublishedEntitiesStageChecker
 			}
 			var settings = settingsReadingResult.Output;
 
-			BootstrapLogger(settings.LogFilePath);
+			BootstrapLogger();
 
 			var publishedEntitiesWithUnexpectedStage = await
 				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false);
@@ -74,10 +89,10 @@ namespace ForgePublishedEntitiesStageChecker
 			Console.ReadLine();
 		}
 
-		private static void BootstrapLogger(string logFilePath)
+		private static void BootstrapLogger()
 		{
 			var loggerFactory = new LoggerFactory();
-			Log.Logger = loggerFactory.CreateLogger(logFilePath);
+			Log.Logger = loggerFactory.CreateLogger();
 		}
 
 		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string mongoConnString)
