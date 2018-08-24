@@ -1,4 +1,5 @@
-﻿using ForgePublishedEntitiesStageChecker.Mongo;
+﻿using ForgePublishedEntitiesStageChecker.Configuration;
+using ForgePublishedEntitiesStageChecker.Mongo;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -17,19 +18,17 @@ namespace ForgePublishedEntitiesStageChecker
 
 		private static async Task RunAsync(string[] args)
 		{
-			IConfiguration config = new ConfigurationBuilder()
-			.AddCommandLine(args)
-			.Build();
+			var configuration = ReadConfiguration(args);
 
-			var configValidator = new ConfigurationValidator();
-			var configValidationResult = configValidator.Validate(config);
-			if (!configValidationResult.IsValid)
+			var configurationParser = new ConfigurationParser();
+			var parsingResult = configurationParser.ParseConfiguration(configuration);
+			if (!parsingResult.IsSuccess)
 			{
-				ShowMessageForMissingConfigurations(configValidationResult.Errors);
+				ShowMessageForConfigurationErrors(parsingResult.Errors);
 				return;
 			}
 
-			var client = new MongoClient(config["MongoConnString"]);
+			var client = new MongoClient(configuration["MongoConnString"]);
 			var db = client.GetDatabase("forge");
 			var coll = db.GetCollection<BsonDocument>("wcm.TagsPublished", new MongoCollectionSettings { GuidRepresentation = GuidRepresentation.CSharpLegacy });
 
@@ -39,7 +38,16 @@ namespace ForgePublishedEntitiesStageChecker
 			Console.WriteLine("Hello my friend !");
 		}
 
-		private static void ShowMessageForMissingConfigurations(IEnumerable<string> errors)
+		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
+		{
+			var config = new ConfigurationBuilder()
+			.AddCommandLine(commandLineArgs)
+			.Build();
+
+			return config;
+		}
+
+		private static void ShowMessageForConfigurationErrors(IEnumerable<string> errors)
 		{
 			var message = string.Join(Environment.NewLine, errors);
 			Console.WriteLine(message);

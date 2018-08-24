@@ -12,7 +12,7 @@ namespace ForgePublishedEntitiesStageChecker.Configuration
 		private const string LogFilePathConfigKey = "LogFilePath";
 		private const string ReportFilePathConfigKey = "ReportFilePath";
 
-		public OperationResult<Settings, string> ExtractSettingsFromConfiguration(IConfiguration configuration)
+		public OperationResult<Settings, string> ParseConfiguration(IConfiguration configuration)
 		{
 			if (configuration == null)
 				throw new ArgumentNullException(nameof(configuration));
