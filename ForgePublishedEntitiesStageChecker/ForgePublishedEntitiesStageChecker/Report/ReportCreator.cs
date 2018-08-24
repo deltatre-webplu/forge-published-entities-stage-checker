@@ -13,7 +13,10 @@ namespace ForgePublishedEntitiesStageChecker.Report
 
 			using (var streamWriter = File.CreateText(reportFilePath))
 			{
-				var serializer = new JsonSerializer();
+				var serializer = new JsonSerializer
+				{
+					Formatting = Formatting.Indented
+				};
 				serializer.Serialize(streamWriter, publishedEntitiesWithUnexpectedStage);
 			}
 		}
