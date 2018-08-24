@@ -9,16 +9,16 @@ using MongoDB.Driver.Linq;
 
 namespace ForgePublishedEntitiesStageChecker.Mongo
 {
-	public class NeutralEntityStageChecker
+	public class BuiltInEntityStageChecker
 	{
 		private readonly IMongoCollection<BsonDocument> _publishedEntities;
 
-		public NeutralEntityStageChecker(IMongoCollection<BsonDocument> publishedEntities)
+		public BuiltInEntityStageChecker(IMongoCollection<BsonDocument> publishedEntities)
 		{
 			_publishedEntities = publishedEntities ?? throw new ArgumentNullException(nameof(publishedEntities));
 		}
 
-		public async Task<ReadOnlyCollection<NeutralEntity>> GetPublishedEntitiesWithUnexpectedStageAsync()
+		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string entityType)
 		{
 			var query = from document in this._publishedEntities.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
@@ -37,7 +37,7 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 
 			var queryItems = await query.ToListAsync().ConfigureAwait(false);
 
-			var neutralEntities = queryItems.Select(item =>
+			var entities = queryItems.Select(item =>
 			{
 				var entityId = item.EntityId.AsGuid;
 
@@ -50,12 +50,12 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 					return new Localization(translationId, slug, title, culture);
 				});
 
-				return new NeutralEntity(entityId, localizations);
+				return new Entity(entityId, entityType, entityType, localizations);
 			})
 			.ToList()
 			.AsReadOnly();
 
-			return neutralEntities;
+			return entities;
 		}
 	}
 }

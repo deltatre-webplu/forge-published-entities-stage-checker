@@ -32,8 +32,8 @@ namespace ForgePublishedEntitiesStageChecker
 			var db = client.GetDatabase("forge");
 			var coll = db.GetCollection<BsonDocument>("wcm.TagsPublished", new MongoCollectionSettings { GuidRepresentation = GuidRepresentation.CSharpLegacy });
 
-			var checker = new NeutralEntityStageChecker(coll);
-			var entities = await checker.GetPublishedEntitiesWithUnexpectedStageAsync().ConfigureAwait(false);
+			var checker = new BuiltInEntityStageChecker(coll);
+			var entities = await checker.GetPublishedEntitiesWithUnexpectedStageAsync("tag").ConfigureAwait(false);
 
 			Console.WriteLine("Hello my friend !");
 		}
