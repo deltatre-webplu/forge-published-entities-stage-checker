@@ -34,7 +34,8 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 											TranslationId = d["_id"],
 											Slug = d["Slug"],
 											Culture = d["TranslationInfo.Culture"],
-											Title = d["Title"]
+											Title = d["Title"],
+											Stage = d["Stage"]
 										})
 									};
 
@@ -50,7 +51,9 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 					var slug = l.Slug.IsBsonNull ? null : l.Slug.AsString;
 					var title = l.Title.IsBsonNull ? null : l.Title.AsString;
 					var translationId = l.TranslationId.AsGuid;
-					return new Localization(translationId, slug, title, culture);
+					var stage = l.Stage.AsString;
+
+					return new Localization(translationId, slug, title, culture, stage);
 				});
 
 				var entityCode = item.EntityCode.IsBsonNull ? null : item.EntityCode.AsString;
