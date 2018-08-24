@@ -1,8 +1,10 @@
 ﻿using ForgePublishedEntitiesStageChecker.Configuration;
 using ForgePublishedEntitiesStageChecker.Contracts;
+using ForgePublishedEntitiesStageChecker.Logging;
 using ForgePublishedEntitiesStageChecker.Mongo;
 using ForgePublishedEntitiesStageChecker.Report;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,6 +45,8 @@ namespace ForgePublishedEntitiesStageChecker
 			}
 			var settings = settingsReadingResult.Output;
 
+			BootstrapLogger(settings.LogFilePath);
+
 			var publishedEntitiesWithUnexpectedStage = await
 				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false);
 
@@ -68,6 +72,12 @@ namespace ForgePublishedEntitiesStageChecker
 
 			Console.WriteLine("Press enter to close...");
 			Console.ReadLine();
+		}
+
+		private static void BootstrapLogger(string logFilePath)
+		{
+			var loggerFactory = new LoggerFactory();
+			Log.Logger = loggerFactory.CreateLogger(logFilePath);
 		}
 
 		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string mongoConnString)

@@ -1,4 +1,5 @@
 ﻿using ForgePublishedEntitiesStageChecker.Contracts;
+using ForgePublishedEntitiesStageChecker.Helpers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ namespace ForgePublishedEntitiesStageChecker.Report
 	{
 		public void CreateJsonReport(string reportFilePath, IEnumerable<Entity> publishedEntitiesWithUnexpectedStage)
 		{
-			EnsureDirectoryPathExists(reportFilePath);
+			FileSystemHelpers.EnsureFileDirectoryExists(reportFilePath);
 
 			using (var streamWriter = File.CreateText(reportFilePath))
 			{
@@ -19,12 +20,6 @@ namespace ForgePublishedEntitiesStageChecker.Report
 				};
 				serializer.Serialize(streamWriter, publishedEntitiesWithUnexpectedStage);
 			}
-		}
-
-		private static void EnsureDirectoryPathExists(string reportFilePath)
-		{
-			var reportDirectoryPath = Path.GetDirectoryName(reportFilePath);
-			Directory.CreateDirectory(reportDirectoryPath);
 		}
 	}
 }
