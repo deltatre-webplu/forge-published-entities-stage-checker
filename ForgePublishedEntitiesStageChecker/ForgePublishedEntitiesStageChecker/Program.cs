@@ -25,17 +25,19 @@ namespace ForgePublishedEntitiesStageChecker
 			("tag", "wcm.TagsPublished")
 		};
 
-		private const string CustomEntitiesCollection = "wcm.CustomEntitiesPublished";
+		private const string CustomEntitiesCollection = "wcm.CustomEntitiesPublished"; 
 
 		public async static Task Main(string[] args)
 		{
-			BootstrapLogger();
+			var configuration = ReadConfiguration(args);
+
+			BootstrapLogger(configuration);
 
 			Log.Information("Start processing");
 
 			try
 			{
-				await RunAsync(args).ConfigureAwait(false);
+				await RunAsync(configuration).ConfigureAwait(false);
 			}
 			catch (Exception exception)
 			{
@@ -47,10 +49,8 @@ namespace ForgePublishedEntitiesStageChecker
 			Log.CloseAndFlush();
 		}
 
-		private static async Task RunAsync(string[] args)
+		private static async Task RunAsync(IConfiguration configuration)
 		{
-			var configuration = ReadConfiguration(args);
-
 			var configurationParser = new ConfigurationParser();
 			var settingsReadingResult = configurationParser.GetSettingsFromConfiguration(configuration);
 			if (!settingsReadingResult.IsSuccess)
@@ -59,8 +59,6 @@ namespace ForgePublishedEntitiesStageChecker
 				return;
 			}
 			var settings = settingsReadingResult.Output;
-
-			BootstrapLogger();
 
 			var publishedEntitiesWithUnexpectedStage = await
 				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false);
@@ -73,8 +71,9 @@ namespace ForgePublishedEntitiesStageChecker
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
 		{
 			var config = new ConfigurationBuilder()
-			.AddCommandLine(commandLineArgs)
-			.Build();
+				.AddJsonFile("appsettings.json")
+				.AddCommandLine(commandLineArgs)
+				.Build();
 
 			return config;
 		}
@@ -89,10 +88,10 @@ namespace ForgePublishedEntitiesStageChecker
 			Console.ReadLine();
 		}
 
-		private static void BootstrapLogger()
+		private static void BootstrapLogger(IConfiguration configuration)
 		{
 			var loggerFactory = new LoggerFactory();
-			Log.Logger = loggerFactory.CreateLogger();
+			Log.Logger = loggerFactory.CreateLogger(configuration);
 		}
 
 		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string mongoConnString)
