@@ -1,5 +1,7 @@
 ﻿using ForgePublishedEntitiesStageChecker.Contracts;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -9,9 +11,11 @@ namespace ForgePublishedEntitiesStageChecker.Configuration
 {
 	public class TenantConfigurationReader
 	{
-		public ReadOnlyCollection<Tenant> ReadTenantsFromFile(string tenantFilePath)
+		public ReadOnlyCollection<Tenant> ReadTenantsFromFile(string filePath)
 		{
-			using (var streamReader = File.OpenText(tenantFilePath))
+			Log.Information("Reading tenants from file {FilePath}...", filePath);
+
+			using (var streamReader = File.OpenText(filePath))
 			{
 				var serializer = new JsonSerializer();
 				var tenants = (IEnumerable<Tenant>)serializer.Deserialize(streamReader, typeof(IEnumerable<Tenant>));

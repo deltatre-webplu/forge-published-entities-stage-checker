@@ -14,21 +14,23 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 	{
 		private readonly IMongoCollection<BsonDocument> _publishedEntitiesColl;
 		private readonly string _entityType;
+		private readonly string _tenantName;
 
-		public BuiltInEntityStageChecker(IMongoCollection<BsonDocument> publishedEntitiesColl, string entityType)
+		public BuiltInEntityStageChecker(IMongoCollection<BsonDocument> publishedEntitiesColl, string entityType, string tenantName)
 		{
 			if (string.IsNullOrWhiteSpace(entityType))
 				throw new ArgumentException("Entity type cannot be null or white space", nameof(entityType));
+
+			if (string.IsNullOrWhiteSpace(tenantName))
+				throw new ArgumentException("Tenant name cannot be null or white space", nameof(tenantName));
 
 			_publishedEntitiesColl = publishedEntitiesColl ?? throw new ArgumentNullException(nameof(publishedEntitiesColl));
 			_entityType = entityType;
 		}
 
-		private string DatabaseName => this._publishedEntitiesColl.Database?.DatabaseNamespace?.DatabaseName;
-
 		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync()
 		{
-			Log.Information("Executing query for entity {EntityType} in database {DatabaseName}...", _entityType, DatabaseName);
+			Log.Information("Executing query for entity {EntityType} in database {DatabaseName}...", _entityType, _tenantName);
 
 			var query = from document in this._publishedEntitiesColl.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
@@ -48,7 +50,7 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 
 			var queryItems = await query.ToListAsync().ConfigureAwait(false);
 
-			Log.Debug("Query for entity {EntityType} in database {DatabaseName} successfully completed", _entityType, DatabaseName);
+			Log.Debug("Query for entity {EntityType} in database {DatabaseName} successfully completed", _entityType, _tenantName);
 
 			var entities = queryItems.Select(item =>
 			{

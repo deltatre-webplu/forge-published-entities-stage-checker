@@ -51,7 +51,6 @@ namespace ForgePublishedEntitiesStageChecker
 
 		private static async Task RunAsync(IConfiguration configuration)
 		{
-			Log.Information("Reading command line arguments...");
 			var configurationParser = new ConfigurationParser();
 			var settingsReadingResult = configurationParser.GetSettingsFromConfiguration(configuration);
 			if (!settingsReadingResult.IsSuccess)
@@ -61,21 +60,20 @@ namespace ForgePublishedEntitiesStageChecker
 			}
 			var settings = settingsReadingResult.Output;
 
-			Log.Debug("Provided command line arguments have been successfully validated");
+			var tenants = ReadTenants(settings.ConfigFilePath);
+			Log.Information("Found {Count} tenant(s)", tenants.Count);
 
-			var collectionFactory = new MongoCollectionFactory(settings.ConfigFilePath);
-
-			var publishedEntitiesWithUnexpectedStage = (await
-				GetPublishedEntitiesWithUnexpectedStageAsync(collectionFactory).ConfigureAwait(false)).ToArray();
-
-			var databaseName = collectionFactory.DatabaseName;
-
-			Log.Information(
-				"Found {NumberOfEntities} published entities with unexpected stage for database {DatabaseName}", 
-				publishedEntitiesWithUnexpectedStage.Length,
-				databaseName);
-
-			ExportJsonReport(settings.ReportDirectoryPath, publishedEntitiesWithUnexpectedStage, databaseName);
+			foreach (var tenant in tenants)
+			{
+				try
+				{
+					await ProcessTenantAsync(tenant, settings.ReportDirectoryPath).ConfigureAwait(false);
+				}
+				catch (Exception exception)
+				{
+					Log.Error(exception, "An error occurred while processing tenant {TenantName}", tenant.Name);
+				}
+			}
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
@@ -100,7 +98,34 @@ namespace ForgePublishedEntitiesStageChecker
 			Log.Logger = loggerFactory.CreateLogger(configuration);
 		}
 
-		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(MongoCollectionFactory collectionFactory)
+		private static ReadOnlyCollection<Tenant> ReadTenants(string configFilePath)
+		{
+			var reader = new TenantConfigurationReader();
+			return reader.ReadTenantsFromFile(configFilePath);
+		}
+
+		private static async Task ProcessTenantAsync(Tenant tenant, string reportDirectoryPath)
+		{
+			Log.Information("Start processing tenant {TenantName}", tenant.Name);
+
+			var collectionFactory = new MongoCollectionFactory(tenant.ConnString);
+
+			var publishedEntitiesWithUnexpectedStage = (await
+				GetPublishedEntitiesWithUnexpectedStageAsync(collectionFactory, tenant.Name).ConfigureAwait(false)).ToArray();
+
+			Log.Debug(
+				"Found {NumberOfEntities} published entities with unexpected stage for tenant {TenantName}",
+				publishedEntitiesWithUnexpectedStage.Length,
+				tenant.Name);
+
+			ExportJsonReport(reportDirectoryPath, publishedEntitiesWithUnexpectedStage, tenant.Name);
+
+			Log.Information("Successfully processed tenant {TenantName}", tenant.Name);
+		}
+
+		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(
+			MongoCollectionFactory collectionFactory, 
+			string tenantName)
 		{
 			var taskFactories = BuiltInEntities.Select(CreateTaskFactory).Concat(new[] { CreateTaskFactoryForCustomEntities() } );
 			var tasks = taskFactories.Select(factory => factory());
@@ -111,14 +136,14 @@ namespace ForgePublishedEntitiesStageChecker
 			Func<Task<ReadOnlyCollection<Entity>>> CreateTaskFactory((string entityType, string collectionName) builtInEntity)
 			{
 				var collection = collectionFactory.GetMongoCollection(builtInEntity.collectionName);
-				var stageChecker = new BuiltInEntityStageChecker(collection, builtInEntity.entityType);
+				var stageChecker = new BuiltInEntityStageChecker(collection, builtInEntity.entityType, tenantName);
 				return () => stageChecker.GetPublishedEntitiesWithUnexpectedStageAsync();
 			}
 
 			Func<Task<ReadOnlyCollection<Entity>>> CreateTaskFactoryForCustomEntities()
 			{
 				var collection = collectionFactory.GetMongoCollection(CustomEntitiesCollection);
-				var stageChecker = new CustomEntityStageChecker(collection);
+				var stageChecker = new CustomEntityStageChecker(collection, tenantName);
 				return () => stageChecker.GetPublishedEntitiesWithUnexpectedStageAsync();
 			}
 		}
@@ -126,10 +151,10 @@ namespace ForgePublishedEntitiesStageChecker
 		private static void ExportJsonReport(
 			string reportDirectoryPath, 
 			IEnumerable<Entity> publishedEntitiesWithUnexpectedStage,
-			string databaseName)
+			string tenantName)
 		{
 			var reportCreator = new ReportCreator();
-			reportCreator.CreateJsonReport(reportDirectoryPath, publishedEntitiesWithUnexpectedStage, databaseName);
+			reportCreator.CreateJsonReport(reportDirectoryPath, publishedEntitiesWithUnexpectedStage, tenantName);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using Deltatre.Utils.Dto;
 using Deltatre.Utils.Extensions.Enumerable;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 
@@ -16,6 +17,8 @@ namespace ForgePublishedEntitiesStageChecker.Configuration
 			if (configuration == null)
 				throw new ArgumentNullException(nameof(configuration));
 
+			Log.Information("Parsing command line arguments...");
+
 			var configFilePath = configuration[ConfigFilePathKey];
 			var reportDirectoryPath = configuration[ReportDirectoryPathKey];
 
@@ -23,6 +26,7 @@ namespace ForgePublishedEntitiesStageChecker.Configuration
 			if (errors.Count > 0)
 				return OperationResult<Settings, string>.CreateFailure(errors.ToNonEmptySequence());
 
+			Log.Debug("Command line arguments have been successfully validated");
 			var settings = new Settings(configFilePath, reportDirectoryPath);
 			return OperationResult<Settings, string>.CreateSuccess(settings);
 		}

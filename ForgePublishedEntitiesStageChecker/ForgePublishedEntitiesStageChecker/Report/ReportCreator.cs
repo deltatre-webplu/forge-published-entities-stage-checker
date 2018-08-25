@@ -13,12 +13,12 @@ namespace ForgePublishedEntitiesStageChecker.Report
 		public void CreateJsonReport(
 			string reportDirectoryPath, 
 			IEnumerable<Entity> publishedEntitiesWithUnexpectedStage, 
-			string databaseName)
+			string tenantName)
 		{
-			Log.Information("Creating JSON report for database {DatabaseName}...", databaseName);
+			Log.Information("Creating JSON report for tenant {TenantName}...", tenantName);
 
-			var reportFilePath = GetReportFilePath(reportDirectoryPath, databaseName);
-			Log.Debug("Computed report file absolute path for database {DatabaseName} is {ReportFilePath}", databaseName, reportFilePath);
+			var reportFilePath = GetReportFilePath(reportDirectoryPath, tenantName);
+			Log.Debug("Computed report file absolute path for tenant {TenantName} is {ReportFilePath}", tenantName, reportFilePath);
 			FileSystemHelpers.EnsureFileDirectoryExists(reportFilePath);
 
 			using (var streamWriter = File.CreateText(reportFilePath))
@@ -30,7 +30,7 @@ namespace ForgePublishedEntitiesStageChecker.Report
 				serializer.Serialize(streamWriter, publishedEntitiesWithUnexpectedStage);
 			}
 
-			Log.Debug("JSON report successfully created for database {DatabaseName}", databaseName);
+			Log.Debug("JSON report successfully created for tenant {TenantName}", tenantName);
 		}
 
 		private static string GetReportFilePath(string reportDirectoryPath, string databaseName)
