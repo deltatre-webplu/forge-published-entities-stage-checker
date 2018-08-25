@@ -16,6 +16,8 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 			_backendDatabase = new Lazy<IMongoDatabase>(() => GetDatabaseFromConnString(connString));
 		}
 
+		public string DatabaseName => this._backendDatabase.Value.DatabaseNamespace.DatabaseName;
+
 		public IMongoCollection<BsonDocument> GetMongoCollection(string collectionName)
 		{
 			return _backendDatabase.Value.GetCollection<BsonDocument>(

@@ -2,6 +2,7 @@
 using ForgePublishedEntitiesStageChecker.Helpers;
 using Newtonsoft.Json;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -25,6 +26,11 @@ namespace ForgePublishedEntitiesStageChecker.Report
 			}
 
 			Log.Debug("JSON report successfully created");
+		}
+
+		private static string GetReportFileDirectoryPath(string reportFileDirectoryPath)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

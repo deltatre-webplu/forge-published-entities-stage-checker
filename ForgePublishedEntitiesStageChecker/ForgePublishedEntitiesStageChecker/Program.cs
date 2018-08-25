@@ -63,8 +63,10 @@ namespace ForgePublishedEntitiesStageChecker
 
 			Log.Debug("Provided command line arguments have been successfully validated");
 
+			var collectionFactory = new MongoCollectionFactory(settings.MongoConnString);
+
 			var publishedEntitiesWithUnexpectedStage = (await
-				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false)).ToArray();
+				GetPublishedEntitiesWithUnexpectedStageAsync(collectionFactory).ConfigureAwait(false)).ToArray();
 
 			Log.Information("Found {NumberOfEntities} published entities with unexpected stage", publishedEntitiesWithUnexpectedStage.Length);
 
@@ -93,10 +95,8 @@ namespace ForgePublishedEntitiesStageChecker
 			Log.Logger = loggerFactory.CreateLogger(configuration);
 		}
 
-		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string mongoConnString)
+		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(MongoCollectionFactory collectionFactory)
 		{
-			var collectionFactory = new MongoCollectionFactory(mongoConnString);
-
 			var taskFactories = BuiltInEntities.Select(CreateTaskFactory).Concat(new[] { CreateTaskFactoryForCustomEntities() } );
 			var tasks = taskFactories.Select(factory => factory());
 			var taskResults = await Task.WhenAll(tasks).ConfigureAwait(false);
