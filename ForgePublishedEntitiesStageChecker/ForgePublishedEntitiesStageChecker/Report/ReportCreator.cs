@@ -36,18 +36,9 @@ namespace ForgePublishedEntitiesStageChecker.Report
 		private static string GetReportFilePath(string reportDirectoryPath, string databaseName)
 		{
 			var fileName = CreateFileName(databaseName);
-			var sanitizedDirectoryPath = SanitizeReportDirectoryPath(reportDirectoryPath);
-
-			return Path.Combine(sanitizedDirectoryPath, fileName);
+			return Path.Combine(reportDirectoryPath, fileName);
 		}
 
-		private static string CreateFileName(string databaseName) => $"{databaseName}-{DateTime.UtcNow:yyyy-MM-dd_hh-mm-ss-zz}.json";
-
-		private static string SanitizeReportDirectoryPath(string reportDirectoryPath)
-		{
-			return FileSystemHelpers.IsDirectory(reportDirectoryPath) ? 
-				reportDirectoryPath : 
-				Path.GetDirectoryName(reportDirectoryPath);
-		}
+		private static string CreateFileName(string databaseName) => $"{databaseName}-{DateTime.Now:yyyy-MM-dd_hh-mm-ss-fffzz}.json";
 	}
 }
