@@ -7,15 +7,15 @@ Projections for both built-in entities and custom entities are checked; the enti
 ## Configuration
 
 There are two mandatories configurations: 
- - ConfigFilePath: absolute path to the JSON configuration file (see above for more info). This file must exist and be accessible to the application.
- - ReportDirectoryPath: absolute path to the directory under which the application will write its output (several JSON report files). The application will automatically create the directory if it doesn't exist.
+ - *ConfigFilePath*: absolute path to the JSON configuration file (see above for more info). **This file must exist and be accessible to the application**.
+ - *ReportDirectoryPath*: absolute path to the directory under which the application will write its output (several JSON report files). The application will automatically create the directory if it doesn't exist.
 
-You can optionally provide the following configurations:
+You can **optionally** provide the following configurations:
 - LogFilePath: absolute path to the log file of the application. If you don't provide this configuration, the application automatically writes a log file called **logs.txt** at the same level of the executable file
 
 ## JSON configuration file
 
-You must provide a JSON configuration file in order to run the application.  
+**You must provide a JSON configuration file in order to run the application**.  
 Inside this file you must write a JSON array containing objects representing the tenants for which you want to run the stage check: there will be one object for each tenant.  
 For each tenant you must provide a name and the connection string of the Forge backoffice database: you can find it inside Forge backoffice under *Administration* -> *Configuration* -> *Back End Store*
 
