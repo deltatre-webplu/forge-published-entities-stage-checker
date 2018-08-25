@@ -68,9 +68,14 @@ namespace ForgePublishedEntitiesStageChecker
 			var publishedEntitiesWithUnexpectedStage = (await
 				GetPublishedEntitiesWithUnexpectedStageAsync(collectionFactory).ConfigureAwait(false)).ToArray();
 
-			Log.Information("Found {NumberOfEntities} published entities with unexpected stage", publishedEntitiesWithUnexpectedStage.Length);
+			var databaseName = collectionFactory.DatabaseName;
 
-			ExportJsonReport(settings.ReportFilePath, publishedEntitiesWithUnexpectedStage);
+			Log.Information(
+				"Found {NumberOfEntities} published entities with unexpected stage for database {DatabaseName}", 
+				publishedEntitiesWithUnexpectedStage.Length,
+				databaseName);
+
+			ExportJsonReport(settings.ReportFilePath, publishedEntitiesWithUnexpectedStage, databaseName);
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
@@ -118,10 +123,13 @@ namespace ForgePublishedEntitiesStageChecker
 			}
 		}
 
-		private static void ExportJsonReport(string reportFilePath, IEnumerable<Entity> publishedEntitiesWithUnexpectedStage)
+		private static void ExportJsonReport(
+			string reportFilePath, 
+			IEnumerable<Entity> publishedEntitiesWithUnexpectedStage,
+			string databaseName)
 		{
 			var reportCreator = new ReportCreator();
-			reportCreator.CreateJsonReport(reportFilePath, publishedEntitiesWithUnexpectedStage);
+			reportCreator.CreateJsonReport(reportFilePath, publishedEntitiesWithUnexpectedStage, databaseName);
 		}
 	}
 }
