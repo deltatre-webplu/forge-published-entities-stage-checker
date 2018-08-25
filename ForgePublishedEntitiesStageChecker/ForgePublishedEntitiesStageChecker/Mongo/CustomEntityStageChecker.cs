@@ -23,11 +23,12 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 				throw new ArgumentException("Tenant name cannot be null or white space", nameof(tenantName));
 
 			_publishedEntitiesColl = publishedEntitiesColl ?? throw new ArgumentNullException(nameof(publishedEntitiesColl));
+			_tenantName = tenantName;
 		}
 
 		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync()
 		{
-			Log.Information("Executing query for {EntityType} in database {DatabaseName}...", "custom entities", _tenantName);
+			Log.Information("Executing query for {EntityType} and tenant {TenantName}...", "custom entities", _tenantName);
 
 			var query = from document in this._publishedEntitiesColl.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
@@ -48,7 +49,7 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 
 			var queryItems = await query.ToListAsync().ConfigureAwait(false);
 
-			Log.Debug("Query for {EntityType} in database {DatabaseName} successfully completed", "custom entities", _tenantName);
+			Log.Debug("Query for {EntityType} and tenant {TenantName} successfully completed", "custom entities", _tenantName);
 
 			var entities = queryItems.Select(item =>
 			{
