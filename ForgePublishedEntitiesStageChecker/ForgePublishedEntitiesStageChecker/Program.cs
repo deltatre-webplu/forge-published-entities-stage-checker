@@ -51,31 +51,31 @@ namespace ForgePublishedEntitiesStageChecker
 
 		private static async Task RunAsync(IConfiguration configuration)
 		{
-			Console.WriteLine("Press enter to start...");
-			Console.ReadLine();
-
 			Log.Information("Reading command line arguments...");
 			var configurationParser = new ConfigurationParser();
 			var settingsReadingResult = configurationParser.GetSettingsFromConfiguration(configuration);
 			if (!settingsReadingResult.IsSuccess)
 			{
-				ShowMessageForConfigurationErrors(settingsReadingResult.Errors);
+				LogErrorsForWrongConfiguration(settingsReadingResult.Errors);
 				return;
 			}
 			var settings = settingsReadingResult.Output;
 
 			Log.Debug("Provided command line arguments have been successfully validated");
 
+			var collectionFactory = new MongoCollectionFactory(settings.MongoConnString);
+
 			var publishedEntitiesWithUnexpectedStage = (await
-				GetPublishedEntitiesWithUnexpectedStageAsync(settings.MongoConnString).ConfigureAwait(false)).ToArray();
+				GetPublishedEntitiesWithUnexpectedStageAsync(collectionFactory).ConfigureAwait(false)).ToArray();
 
-			Log.Information("Found {NumberOfEntities} published entities with unexpected stage", publishedEntitiesWithUnexpectedStage.Length);
+			var databaseName = collectionFactory.DatabaseName;
 
-			ExportJsonReport(settings.ReportFilePath, publishedEntitiesWithUnexpectedStage);
+			Log.Information(
+				"Found {NumberOfEntities} published entities with unexpected stage for database {DatabaseName}", 
+				publishedEntitiesWithUnexpectedStage.Length,
+				databaseName);
 
-			Console.WriteLine();
-			Console.WriteLine("Execution completed. Press enter to close...");
-			Console.ReadLine();
+			ExportJsonReport(settings.ReportDirectoryPath, publishedEntitiesWithUnexpectedStage, databaseName);
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
@@ -88,14 +88,10 @@ namespace ForgePublishedEntitiesStageChecker
 			return config;
 		}
 
-		private static void ShowMessageForConfigurationErrors(IEnumerable<string> errors)
+		private static void LogErrorsForWrongConfiguration(IEnumerable<string> errors)
 		{
-			var message = string.Join(Environment.NewLine, errors);
-			Console.WriteLine(message);
-			Console.WriteLine();
-
-			Console.WriteLine("Press enter to close...");
-			Console.ReadLine();
+			var missingConfigurations = string.Join(" ", errors);
+			Log.Error("Missing mandatory configuration(s): {MissingConfigurations}", missingConfigurations);
 		}
 
 		private static void BootstrapLogger(IConfiguration configuration)
@@ -104,10 +100,8 @@ namespace ForgePublishedEntitiesStageChecker
 			Log.Logger = loggerFactory.CreateLogger(configuration);
 		}
 
-		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(string mongoConnString)
+		private static async Task<IEnumerable<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync(MongoCollectionFactory collectionFactory)
 		{
-			var collectionFactory = new MongoCollectionFactory(mongoConnString);
-
 			var taskFactories = BuiltInEntities.Select(CreateTaskFactory).Concat(new[] { CreateTaskFactoryForCustomEntities() } );
 			var tasks = taskFactories.Select(factory => factory());
 			var taskResults = await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -117,8 +111,8 @@ namespace ForgePublishedEntitiesStageChecker
 			Func<Task<ReadOnlyCollection<Entity>>> CreateTaskFactory((string entityType, string collectionName) builtInEntity)
 			{
 				var collection = collectionFactory.GetMongoCollection(builtInEntity.collectionName);
-				var stageChecker = new BuiltInEntityStageChecker(collection);
-				return () => stageChecker.GetPublishedEntitiesWithUnexpectedStageAsync(builtInEntity.entityType);
+				var stageChecker = new BuiltInEntityStageChecker(collection, builtInEntity.entityType);
+				return () => stageChecker.GetPublishedEntitiesWithUnexpectedStageAsync();
 			}
 
 			Func<Task<ReadOnlyCollection<Entity>>> CreateTaskFactoryForCustomEntities()
@@ -129,10 +123,13 @@ namespace ForgePublishedEntitiesStageChecker
 			}
 		}
 
-		private static void ExportJsonReport(string reportFilePath, IEnumerable<Entity> publishedEntitiesWithUnexpectedStage)
+		private static void ExportJsonReport(
+			string reportDirectoryPath, 
+			IEnumerable<Entity> publishedEntitiesWithUnexpectedStage,
+			string databaseName)
 		{
 			var reportCreator = new ReportCreator();
-			reportCreator.CreateJsonReport(reportFilePath, publishedEntitiesWithUnexpectedStage);
+			reportCreator.CreateJsonReport(reportDirectoryPath, publishedEntitiesWithUnexpectedStage, databaseName);
 		}
 	}
 }

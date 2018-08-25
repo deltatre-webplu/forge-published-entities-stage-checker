@@ -21,9 +21,11 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 			_publishedEntitiesColl = publishedEntitiesColl ?? throw new ArgumentNullException(nameof(publishedEntitiesColl));
 		}
 
+		private string DatabaseName => this._publishedEntitiesColl.Database?.DatabaseNamespace?.DatabaseName;
+
 		public async Task<ReadOnlyCollection<Entity>> GetPublishedEntitiesWithUnexpectedStageAsync()
 		{
-			Log.Information("Executing query for {EntityType}...", "custom entities");
+			Log.Information("Executing query for {EntityType} in database {DatabaseName}...", "custom entities", DatabaseName);
 
 			var query = from document in this._publishedEntitiesColl.AsQueryable()
 									where document["Stage"] == "reviewed" || document["Stage"] == "unpublished"
@@ -44,7 +46,7 @@ namespace ForgePublishedEntitiesStageChecker.Mongo
 
 			var queryItems = await query.ToListAsync().ConfigureAwait(false);
 
-			Log.Debug("Query for {EntityType} successfully completed", "custom entities");
+			Log.Debug("Query for {EntityType} in database {DatabaseName} successfully completed", "custom entities", DatabaseName);
 
 			var entities = queryItems.Select(item =>
 			{
