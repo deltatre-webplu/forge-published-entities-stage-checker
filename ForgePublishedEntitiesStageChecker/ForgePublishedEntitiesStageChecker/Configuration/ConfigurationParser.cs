@@ -32,10 +32,10 @@ namespace ForgePublishedEntitiesStageChecker.Configuration
 			var errors = new List<string>();
 
 			if (string.IsNullOrWhiteSpace(mongoConnString))
-				errors.Add($"Missing mandatory configuration: {MongoConnStringConfigKey}");
+				errors.Add(MongoConnStringConfigKey);
 
 			if (string.IsNullOrWhiteSpace(reportFilePath))
-				errors.Add($"Missing mandatory configuration: {ReportFilePathConfigKey}");
+				errors.Add(ReportFilePathConfigKey);
 
 			return errors;
 		}

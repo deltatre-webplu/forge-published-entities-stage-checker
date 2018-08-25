@@ -51,15 +51,12 @@ namespace ForgePublishedEntitiesStageChecker
 
 		private static async Task RunAsync(IConfiguration configuration)
 		{
-			Console.WriteLine("Press enter to start...");
-			Console.ReadLine();
-
 			Log.Information("Reading command line arguments...");
 			var configurationParser = new ConfigurationParser();
 			var settingsReadingResult = configurationParser.GetSettingsFromConfiguration(configuration);
 			if (!settingsReadingResult.IsSuccess)
 			{
-				ShowMessageForConfigurationErrors(settingsReadingResult.Errors);
+				LogErrorsForWrongConfiguration(settingsReadingResult.Errors);
 				return;
 			}
 			var settings = settingsReadingResult.Output;
@@ -72,10 +69,6 @@ namespace ForgePublishedEntitiesStageChecker
 			Log.Information("Found {NumberOfEntities} published entities with unexpected stage", publishedEntitiesWithUnexpectedStage.Length);
 
 			ExportJsonReport(settings.ReportFilePath, publishedEntitiesWithUnexpectedStage);
-
-			Console.WriteLine();
-			Console.WriteLine("Execution completed. Press enter to close...");
-			Console.ReadLine();
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
@@ -88,14 +81,10 @@ namespace ForgePublishedEntitiesStageChecker
 			return config;
 		}
 
-		private static void ShowMessageForConfigurationErrors(IEnumerable<string> errors)
+		private static void LogErrorsForWrongConfiguration(IEnumerable<string> errors)
 		{
-			var message = string.Join(Environment.NewLine, errors);
-			Console.WriteLine(message);
-			Console.WriteLine();
-
-			Console.WriteLine("Press enter to close...");
-			Console.ReadLine();
+			var missingConfigurations = string.Join(" ", errors);
+			Log.Error("Missing mandatory configuration(s): {MissingConfigurations}", missingConfigurations);
 		}
 
 		private static void BootstrapLogger(IConfiguration configuration)
