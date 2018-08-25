@@ -79,7 +79,6 @@ namespace ForgePublishedEntitiesStageChecker
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
 		{
 			var config = new ConfigurationBuilder()
-				.AddJsonFile("appsettings.json")
 				.AddCommandLine(commandLineArgs)
 				.Build();
 
