@@ -7,18 +7,18 @@ Projections for both built-in entities and custom entities are checked; the enti
 ## Configuration
 
 There are two mandatories configurations: 
- - MongoConnString: connection string of your Forge backoffice database. You can find it inside Forge backoffice under *Administration* -> *Configuration* -> *Back End Store*
- - ReportFilePath: absolute path to the JSON report file produced by the application. The application will automatically create the file directory if it doesn't exist.
+ - ConfigFilePath: absolute path to the JSON configuration file (see above for more info). This file must exist and be accessible to the application.
+ - ReportDirectoryPath: absolute path to the directory under which the application will write its output (several JSON report files). The application will automatically create the directory if it doesn't exist.
 
 ## Invoke from command line
 
 Command line invokation command for Windows environment:
 ```
-ForgePublishedEntitiesStageChecker.exe --MongoConnString="YOUR MONGO CONN STRING" --ReportFilePath="C:\temp\myDir\report.json"
+ForgePublishedEntitiesStageChecker.exe --ConfigFilePath="C:\foo\bar\config.json" --ReportDirectoryPath="C:\myDir\myReports"
 ```
 
 Command line invokation command for MacOS environment:
 ```
-./ForgePublishedEntitiesStageChecker --MongoConnString="YOUR MONGO CONN STRING" --ReportFilePath="YOUR ABSOLUTE PATH TO JSON REPORT FILE"
+./ForgePublishedEntitiesStageChecker --ConfigFilePath="/Foo/Bar/config.json" --ReportDirectoryPath="/MyDir/MyReports/"
 ```
 
