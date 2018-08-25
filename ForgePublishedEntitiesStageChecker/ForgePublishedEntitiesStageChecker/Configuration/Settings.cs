@@ -3,12 +3,12 @@
 	public class Settings
 	{
 		public string MongoConnString { get; }
-		public string ReportFilePath { get; }
+		public string ReportDirectoryPath { get; }
 
-		public Settings(string mongoConnString, string reportFilePath)
+		public Settings(string mongoConnString, string reportDirectoryPath)
 		{
 			this.MongoConnString = mongoConnString;
-			this.ReportFilePath = reportFilePath;
+			this.ReportDirectoryPath = reportDirectoryPath;
 		}
 	}
 }

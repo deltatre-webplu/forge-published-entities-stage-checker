@@ -75,7 +75,7 @@ namespace ForgePublishedEntitiesStageChecker
 				publishedEntitiesWithUnexpectedStage.Length,
 				databaseName);
 
-			ExportJsonReport(settings.ReportFilePath, publishedEntitiesWithUnexpectedStage, databaseName);
+			ExportJsonReport(settings.ReportDirectoryPath, publishedEntitiesWithUnexpectedStage, databaseName);
 		}
 
 		private static IConfiguration ReadConfiguration(string[] commandLineArgs)
@@ -124,12 +124,12 @@ namespace ForgePublishedEntitiesStageChecker
 		}
 
 		private static void ExportJsonReport(
-			string reportFilePath, 
+			string reportDirectoryPath, 
 			IEnumerable<Entity> publishedEntitiesWithUnexpectedStage,
 			string databaseName)
 		{
 			var reportCreator = new ReportCreator();
-			reportCreator.CreateJsonReport(reportFilePath, publishedEntitiesWithUnexpectedStage, databaseName);
+			reportCreator.CreateJsonReport(reportDirectoryPath, publishedEntitiesWithUnexpectedStage, databaseName);
 		}
 	}
 }
