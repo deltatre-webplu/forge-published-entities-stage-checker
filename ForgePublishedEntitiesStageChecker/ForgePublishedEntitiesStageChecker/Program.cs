@@ -117,8 +117,8 @@ namespace ForgePublishedEntitiesStageChecker
 			Func<Task<ReadOnlyCollection<Entity>>> CreateTaskFactory((string entityType, string collectionName) builtInEntity)
 			{
 				var collection = collectionFactory.GetMongoCollection(builtInEntity.collectionName);
-				var stageChecker = new BuiltInEntityStageChecker(collection);
-				return () => stageChecker.GetPublishedEntitiesWithUnexpectedStageAsync(builtInEntity.entityType);
+				var stageChecker = new BuiltInEntityStageChecker(collection, builtInEntity.entityType);
+				return () => stageChecker.GetPublishedEntitiesWithUnexpectedStageAsync();
 			}
 
 			Func<Task<ReadOnlyCollection<Entity>>> CreateTaskFactoryForCustomEntities()
