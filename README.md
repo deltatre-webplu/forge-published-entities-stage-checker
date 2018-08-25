@@ -15,7 +15,7 @@ You can **optionally** provide the following configurations:
 
 ## JSON configuration file
 
-**You must provide a JSON configuration file in order to run the application**.
+**You must provide a valid JSON configuration file in order to run the application**.
 
 Inside this file you must write a JSON array containing objects representing the tenants for which you want to run the stage check: there will be one object for each tenant.  
 
