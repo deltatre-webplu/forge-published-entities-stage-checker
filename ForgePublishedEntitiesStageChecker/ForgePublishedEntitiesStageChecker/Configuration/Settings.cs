@@ -2,12 +2,12 @@
 {
 	public class Settings
 	{
-		public string MongoConnString { get; }
+		public string ConfigFilePath { get; }
 		public string ReportDirectoryPath { get; }
 
-		public Settings(string mongoConnString, string reportDirectoryPath)
+		public Settings(string configFilePath, string reportDirectoryPath)
 		{
-			this.MongoConnString = mongoConnString;
+			this.ConfigFilePath = configFilePath;
 			this.ReportDirectoryPath = reportDirectoryPath;
 		}
 	}

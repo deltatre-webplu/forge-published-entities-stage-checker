@@ -63,7 +63,7 @@ namespace ForgePublishedEntitiesStageChecker
 
 			Log.Debug("Provided command line arguments have been successfully validated");
 
-			var collectionFactory = new MongoCollectionFactory(settings.MongoConnString);
+			var collectionFactory = new MongoCollectionFactory(settings.ConfigFilePath);
 
 			var publishedEntitiesWithUnexpectedStage = (await
 				GetPublishedEntitiesWithUnexpectedStageAsync(collectionFactory).ConfigureAwait(false)).ToArray();
