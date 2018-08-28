@@ -27,12 +27,12 @@ This is an example of a valid JSON configuration file:
 ```
 [
 	{
-		"name": "broncos",
-		"connString": "CONN STRING FOR BRONCOS DATABASE"
+		"name": "tenant1",
+		"connString": "CONN STRING FOR TENANT1 DATABASE"
 	},
 	{
-		"name": "dallas_cowboys",
-		"connString": "CONN STRING FOR DALLAS COWBOYS DATABASE"
+		"name": "tenant2",
+		"connString": "CONN STRING FOR TENANT2 DATABASE"
 	}
 ]
 ```
